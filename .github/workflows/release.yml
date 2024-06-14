@@ -1,0 +1,48 @@
+name: release
+on:
+  push:
+    tags: ['v*.*.*']
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: git fetch --tags
+      - name: check branch
+        run: |
+          br="$(git branch --contains $GITHUB_REF --format '%(refname:short)' main)"
+          if [[ "$br" != "main" ]]; then
+            echo "$br != main"
+            exit 1
+          fi
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+      - name: release-notes
+        run: 'echo "$(git tag -l --format="%(contents:body)" $GITHUB_REF_NAME)" > RELEASE_NOTES'
+      - name: version
+        id: version
+        run: 'git describe --always --dirty $GITHUB_REF_NAME | sed "s/^v//"'
+      - uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref }}
+          body_path: RELEASE_NOTES
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/ira-controller
+          asset_name: ira-controller
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

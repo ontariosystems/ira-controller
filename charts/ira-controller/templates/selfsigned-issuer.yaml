@@ -1,0 +1,10 @@
+{{- if .Values.webhookService.useCertManager }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "ira-controller.fullname" . }}-selfsigned-issuer
+  labels:
+    {{- include "ira-controller.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}

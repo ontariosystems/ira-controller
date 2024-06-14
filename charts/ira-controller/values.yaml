@@ -1,0 +1,26 @@
+controllerManager:
+  affinity: {}
+  manager:
+    args: []
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    image:
+      repository: ghcr.io/ontariosystems/ira-controller
+      tag:
+    resources: []
+    useCertManager: false
+  replicas: 2
+  serviceAccount:
+    annotations: {}
+  tolerations: {}
+kubernetesClusterDomain: cluster.local
+webhookService:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  type: ClusterIP
+  useCertManager: true

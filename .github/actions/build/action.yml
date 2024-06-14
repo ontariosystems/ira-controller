@@ -1,0 +1,22 @@
+name: build
+description: builds ira-controller
+inputs:
+  go-version:
+    description: "the version of golang"
+    default: '1.22'
+  codecov_token:
+    default: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+    - run: make build test
+      shell: bash
+    - uses: codecov/codecov-action@v4
+      with:
+        fail_ci_if_error: true
+        file: ./cover.out
+        token: ${{ inputs.codecov_token }}
+        verbose: true

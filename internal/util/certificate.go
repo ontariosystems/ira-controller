@@ -59,7 +59,7 @@ func GenerateCertificate(ctx context.Context, annotations map[string]string, nam
 				Namespace: namespace,
 			},
 			Spec: cmv1.CertificateSpec{
-				CommonName: fmt.Sprintf("IRA: %s/%s", namespace, name),
+				CommonName: getCommonName(name, namespace),
 				IssuerRef: cmmeta.ObjectReference{
 					Name:  issuerName,
 					Kind:  issuerKind,
@@ -97,4 +97,12 @@ func GenerateCertificate(ctx context.Context, annotations map[string]string, nam
 		log.Info("Skipping unannotated resource")
 	}
 	return ctrl.Result{}, nil
+}
+
+func getCommonName(name string, namespace string) string {
+	commonName := fmt.Sprintf("%s/%s", namespace, name)
+	if len(commonName) < 65 {
+		return commonName
+	}
+	return commonName[:64]
 }

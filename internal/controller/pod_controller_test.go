@@ -281,6 +281,49 @@ var _ = Describe("Pod Controller", func() {
 
 						})
 					})
+					Context("when the pod name is too long for the common name", func() {
+						It("should truncate the common name to 64 characters", func() {
+							ctx := context.Background()
+							pod := &v1.Pod{
+								ObjectMeta: metav1.ObjectMeta{
+									Annotations: map[string]string{
+										"ira.ontsys.com/trust-anchor": "ta",
+										"ira.ontsys.com/profile":      "p",
+										"ira.ontsys.com/role":         "c",
+									},
+									Name:      "this-is-a-really-long-pod-name-that-will-cause-a-failure-when-creating-the-cert",
+									Namespace: "default",
+								},
+								Spec: v1.PodSpec{
+									Containers: []v1.Container{
+										{
+											Name:  "my-container",
+											Image: "my-image",
+										},
+									},
+								},
+							}
+							Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+
+							Eventually(func() *gbytes.Buffer {
+								return buffer
+							}, 5*time.Second, 25*time.Millisecond).Should(gbytes.Say("Cert doesn't exist: creating"))
+
+							certificate := &cmv1.Certificate{}
+							Eventually(func() bool {
+								err := k8sClient.Get(ctx, types.NamespacedName{
+									Namespace: "default",
+									Name:      "this-is-a-really-long-pod-name-that-will-cause-a-failure-when-creating-the-cert-ira",
+								}, certificate)
+								return err == nil
+							}, 10*time.Second, 25*time.Millisecond).Should(BeTrue())
+							Expect(certificate.Name).To(Equal("this-is-a-really-long-pod-name-that-will-cause-a-failure-when-creating-the-cert-ira"))
+							Expect(certificate.Spec.CommonName).To(Equal("default/this-is-a-really-long-pod-name-that-will-cause-a-failure"))
+							Expect(certificate.OwnerReferences[0].Kind).To(Equal("Pod"))
+							Expect(certificate.OwnerReferences[0].Name).To(Equal("this-is-a-really-long-pod-name-that-will-cause-a-failure-when-creating-the-cert"))
+
+						})
+					})
 				})
 
 				Context("when the certificate does exist", func() {
@@ -343,7 +386,7 @@ var _ = Describe("Pod Controller", func() {
 						Expect(certificate.Name).To(Equal("existing-cert-ira"))
 						Expect(certificate.OwnerReferences[0].Kind).To(Equal("Pod"))
 						Expect(certificate.OwnerReferences[0].Name).To(Equal("existing-cert"))
-						Expect(certificate.Spec.CommonName).To(Equal(fmt.Sprintf("IRA: %s/%s", "default", "existing-cert")))
+						Expect(certificate.Spec.CommonName).To(Equal(fmt.Sprintf("%s/%s", "default", "existing-cert")))
 					})
 				})
 			})

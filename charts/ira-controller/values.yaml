@@ -11,12 +11,12 @@ controllerManager:
       repository: ghcr.io/ontariosystems/ira-controller
       tag:
     podLabels: {}
-    resources: []
+    resources: {}
     useCertManager: false
   replicas: 2
   serviceAccount:
     annotations: {}
-  tolerations: {}
+  tolerations: []
 kubernetesClusterDomain: cluster.local
 webhookService:
   ports:

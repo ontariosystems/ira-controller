@@ -10,6 +10,7 @@ controllerManager:
     image:
       repository: ghcr.io/ontariosystems/ira-controller
       tag:
+    podLabels: {}
     resources: []
     useCertManager: false
   replicas: 2

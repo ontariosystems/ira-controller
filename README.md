@@ -65,7 +65,7 @@ helm repo update
 
 Then install a release using the chart.  The [charts default values file](charts/ira-controller/values.yaml) provides some commented out examples for setting some of the values.  There are several required values, but helm should fail with messages that indicate which value is missing.
 ```sh
-helm upgrade --install ira-controller \
+helm upgrade --install --namespace ira-controller-system ira-controller \
     ira-controller/ira-controller --values <<name_of_your_values_file>>.yaml
 ```
 

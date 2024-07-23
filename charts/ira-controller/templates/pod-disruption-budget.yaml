@@ -1,0 +1,15 @@
+{{- if .Values.controllerManager.manager.podDisruptionBudget }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ira-controller.fullname" . }}
+spec:
+  {{- if le (.Values.controllerManager.replicas | int) 2 }}
+  maxUnavailable: 1
+  {{- else }}
+  minAvailable: 2
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ira-controller.selectorLabels" . | nindent 6 }}
+{{- end }}

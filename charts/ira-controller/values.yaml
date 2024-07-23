@@ -10,6 +10,8 @@ controllerManager:
     image:
       repository: ghcr.io/ontariosystems/ira-controller
       tag:
+    podDisruptionBudget:
+      enabled: true
     podLabels: {}
     resources: {}
     useCertManager: false

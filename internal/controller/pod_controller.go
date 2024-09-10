@@ -33,8 +33,10 @@ import (
 )
 
 var (
-	DefaultIssuerKind string
-	DefaultIssuerName string
+	DefaultIssuerKind             string
+	DefaultIssuerName             string
+	DefaultCertificateDuration    string
+	DefaultCertificateRenewBefore string
 )
 
 // PodReconciler reconciles a Pod object
@@ -105,7 +107,10 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		issuerName = pod.Annotations["ira.ontsys.com/issuer-name"]
 	}
 
-	return util.GenerateCertificate(ctx, pod.ObjectMeta.Annotations, name, pod.Namespace, owner, issuerKind, issuerName)
+	certDuration := DefaultCertificateDuration
+	certRenewBefore := DefaultCertificateRenewBefore
+
+	return util.GenerateCertificate(ctx, pod.ObjectMeta.Annotations, name, pod.Namespace, owner, issuerKind, issuerName, certDuration, certRenewBefore)
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -237,6 +237,133 @@ var _ = Describe("Pod Controller", func() {
 								Expect(certificate.Spec.IssuerRef.Name).To(Equal("i"))
 							})
 						})
+						Context("when the controller has been configured with valid certificate duration configuration", func() {
+							BeforeEach(func() {
+								DefaultCertificateDuration = "2880h"
+								DefaultCertificateRenewBefore = "1152h"
+							})
+							AfterEach(func() {
+								DefaultCertificateDuration = ""
+								DefaultCertificateRenewBefore = ""
+							})
+							It("should use the configured duration information", func() {
+								certDuration, _ := time.ParseDuration(DefaultCertificateDuration)
+								certRenewBefore, _ := time.ParseDuration(DefaultCertificateRenewBefore)
+								ctx := context.Background()
+								pod := &v1.Pod{
+									ObjectMeta: metav1.ObjectMeta{
+										Annotations: map[string]string{
+											"ira.ontsys.com/trust-anchor": "ta",
+											"ira.ontsys.com/profile":      "p",
+											"ira.ontsys.com/role":         "c",
+										},
+										Name:      "duration",
+										Namespace: "default",
+									},
+									Spec: v1.PodSpec{
+										Containers: []v1.Container{
+											{
+												Name:  "my-container",
+												Image: "my-image",
+											},
+										},
+									},
+								}
+								Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+
+								Eventually(func() *gbytes.Buffer {
+									return buffer
+								}, 5*time.Second, 25*time.Millisecond).Should(gbytes.Say("Cert doesn't exist: creating"))
+
+								certificate := &cmv1.Certificate{}
+								Eventually(func() bool {
+									err := k8sClient.Get(ctx, types.NamespacedName{
+										Namespace: "default",
+										Name:      "duration-ira",
+									}, certificate)
+									return err == nil
+								}, 10*time.Second, 25*time.Millisecond).Should(BeTrue())
+								Expect(certificate.Name).To(Equal("duration-ira"))
+								Expect(certificate.OwnerReferences[0].Kind).To(Equal("Pod"))
+								Expect(certificate.OwnerReferences[0].Name).To(Equal("duration"))
+								Expect(certificate.Spec.Duration).To(Equal(&metav1.Duration{Duration: certDuration}))
+								Expect(certificate.Spec.RenewBefore).To(Equal(&metav1.Duration{Duration: certRenewBefore}))
+							})
+						})
+						Context("when the controller has been configured with an invalid certificate duration", func() {
+							BeforeEach(func() {
+								DefaultCertificateDuration = "2880d"
+								DefaultCertificateRenewBefore = "1152h"
+							})
+							AfterEach(func() {
+								DefaultCertificateDuration = ""
+								DefaultCertificateRenewBefore = ""
+							})
+							It("should fail to parse the duration", func() {
+								ctx := context.Background()
+								pod := &v1.Pod{
+									ObjectMeta: metav1.ObjectMeta{
+										Annotations: map[string]string{
+											"ira.ontsys.com/trust-anchor": "ta",
+											"ira.ontsys.com/profile":      "p",
+											"ira.ontsys.com/role":         "c",
+										},
+										Name:      "invalid-duration",
+										Namespace: "default",
+									},
+									Spec: v1.PodSpec{
+										Containers: []v1.Container{
+											{
+												Name:  "my-container",
+												Image: "my-image",
+											},
+										},
+									},
+								}
+								Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+
+								Eventually(func() *gbytes.Buffer {
+									return buffer
+								}, 5*time.Second, 25*time.Millisecond).Should(gbytes.Say("time: unknown unit"))
+							})
+						})
+						Context("when the controller has been configured with an invalid certificate renew before", func() {
+							BeforeEach(func() {
+								DefaultCertificateDuration = "2880h"
+								DefaultCertificateRenewBefore = "1152d"
+							})
+							AfterEach(func() {
+								DefaultCertificateDuration = ""
+								DefaultCertificateRenewBefore = ""
+							})
+							It("should fail to parse the duration", func() {
+								ctx := context.Background()
+								pod := &v1.Pod{
+									ObjectMeta: metav1.ObjectMeta{
+										Annotations: map[string]string{
+											"ira.ontsys.com/trust-anchor": "ta",
+											"ira.ontsys.com/profile":      "p",
+											"ira.ontsys.com/role":         "c",
+										},
+										Name:      "invalid-renew-before",
+										Namespace: "default",
+									},
+									Spec: v1.PodSpec{
+										Containers: []v1.Container{
+											{
+												Name:  "my-container",
+												Image: "my-image",
+											},
+										},
+									},
+								}
+								Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+
+								Eventually(func() *gbytes.Buffer {
+									return buffer
+								}, 5*time.Second, 25*time.Millisecond).Should(gbytes.Say("time: unknown unit"))
+							})
+						})
 					})
 					Context("using a provided certificate name", func() {
 						It("should create the certificate", func() {

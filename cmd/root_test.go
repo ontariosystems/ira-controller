@@ -41,7 +41,7 @@ var _ = Describe("Cmd configure", func() {
 					Expect(rc).To(Equal(1))
 				})
 			})
-			Context("with an valid issuer kind", func() {
+			Context("with a valid issuer kind", func() {
 				BeforeEach(func() {
 					controller.DefaultIssuerKind = "ClusterIssuer"
 				})

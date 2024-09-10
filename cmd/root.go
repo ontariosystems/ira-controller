@@ -200,6 +200,10 @@ func addFlags() *rootFlags {
 		"The kind of the cert-manager issuer to use as a default when generating a certificate if one isn't specified")
 	flag.StringVar(&controller.DefaultIssuerName, "default-issuer-name", "",
 		"The name of the cert-manager issuer to use as a default when generating a certificate if one isn't specified")
+	flag.StringVar(&controller.DefaultCertificateDuration, "default-certificate-duration", "",
+		"The `duration` of the cert-manager certificate when generating a certificate")
+	flag.StringVar(&controller.DefaultCertificateRenewBefore, "default-certificate-renew-before", "1152h",
+		"How long before the currently issued certificate’s expiry to renew when generating a certificate")
 
 	opts := zap.Options{
 		Development: true,

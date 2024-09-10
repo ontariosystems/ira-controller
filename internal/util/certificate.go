@@ -19,6 +19,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"time"
 
 	cmv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
@@ -41,7 +42,7 @@ func GetCertName(podAnnotations map[string]string, resourceControllerName string
 }
 
 // GenerateCertificate creates/updates a certificate resource to be used for authentication
-func GenerateCertificate(ctx context.Context, annotations map[string]string, name string, namespace string, ownerReference *metav1.OwnerReference, issuerKind string, issuerName string) (ctrl.Result, error) {
+func GenerateCertificate(ctx context.Context, annotations map[string]string, name string, namespace string, ownerReference *metav1.OwnerReference, issuerKind string, issuerName string, certDuration string, certRenewBefore string) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	if MapContains(annotations, "ira.ontsys.com/trust-anchor") && MapContains(annotations, "ira.ontsys.com/profile") && MapContains(annotations, "ira.ontsys.com/role") {
 		log.Info("Found resource with annotations", "controller name", name)
@@ -71,6 +72,22 @@ func GenerateCertificate(ctx context.Context, annotations map[string]string, nam
 					Size:      8192,
 				},
 			},
+		}
+
+		if certDuration != "" {
+			if duration, err := time.ParseDuration(certDuration); err != nil {
+				return reconcile.Result{}, err
+			} else {
+				certificate.Spec.Duration = &metav1.Duration{Duration: duration}
+			}
+		}
+
+		if certRenewBefore != "" {
+			if duration, err := time.ParseDuration(certRenewBefore); err != nil {
+				return reconcile.Result{}, err
+			} else {
+				certificate.Spec.RenewBefore = &metav1.Duration{Duration: duration}
+			}
 		}
 
 		if ownerReference != nil {

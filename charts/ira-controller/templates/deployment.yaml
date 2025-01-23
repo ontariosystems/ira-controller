@@ -77,6 +77,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      priorityClassName: {{ .Values.controllerManager.priorityClassName }}
       volumes:
       - name: cert
         secret:

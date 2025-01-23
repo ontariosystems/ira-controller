@@ -15,6 +15,7 @@ controllerManager:
     podLabels: {}
     resources: {}
     useCertManager: false
+  priorityClassName: system-cluster-critical
   replicas: 2
   serviceAccount:
     annotations: {}

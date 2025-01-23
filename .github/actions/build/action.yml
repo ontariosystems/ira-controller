@@ -3,7 +3,7 @@ description: builds ira-controller
 inputs:
   go-version:
     description: "the version of golang"
-    default: '1.22'
+    default: '1.23'
   codecov_token:
     default: true
 runs:

@@ -105,7 +105,7 @@ func (p *podIraInjector) Handle(ctx context.Context, request admission.Request) 
 			}
 			c.Env = append(c.Env, v1.EnvVar{
 				Name:  "AWS_EC2_METADATA_SERVICE_ENDPOINT",
-				Value: "http://127.0.0.1:9911/",
+				Value: "http://127.0.0.1:9911",
 			})
 			pod.Spec.Containers[i] = c
 		}

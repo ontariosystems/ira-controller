@@ -112,7 +112,7 @@ var _ = Describe("Pod Webhook", func() {
 				Expect(mutatedPod.Spec.Volumes).To(ContainElement(HaveField("VolumeSource.Secret.SecretName", "annotated-ira")))
 				Expect(mutatedPod.Spec.Containers).To(HaveExactElements(HaveField("Env", ContainElement(v1.EnvVar{
 					Name:  "AWS_EC2_METADATA_SERVICE_ENDPOINT",
-					Value: "http://127.0.0.1:9911/",
+					Value: "http://127.0.0.1:9911",
 				}))))
 				Expect(mutatedPod.Spec.InitContainers).To(ContainElement(HaveField("Name", Equal("ira"))))
 				Expect(mutatedPod.Spec.InitContainers).To(ContainElement(HaveField("VolumeMounts", ContainElement(v1.VolumeMount{

@@ -99,13 +99,18 @@ func (p *podIraInjector) Handle(ctx context.Context, request admission.Request) 
 			},
 		})
 
+		endpoint := "http://127.0.0.1:9911"
+		if util.MapContains(pod.Annotations, "ira.ontsys.com/metadata-endpoint-trailing-slash") && pod.Annotations["ira.ontsys.com/metadata-endpoint-trailing-slash"] != "" {
+			endpoint += "/"
+		}
+
 		for i, c := range pod.Spec.Containers {
 			if c.Env == nil {
 				c.Env = make([]v1.EnvVar, 0)
 			}
 			c.Env = append(c.Env, v1.EnvVar{
 				Name:  "AWS_EC2_METADATA_SERVICE_ENDPOINT",
-				Value: "http://127.0.0.1:9911",
+				Value: endpoint,
 			})
 			pod.Spec.Containers[i] = c
 		}

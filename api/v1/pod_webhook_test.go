@@ -225,5 +225,70 @@ var _ = Describe("Pod Webhook", func() {
 				})
 			})
 		})
+		Context("with IRA annotations and requiring a trailing slash", func() {
+			It("should mutate the pod", func() {
+				ctx := context.Background()
+				pod := &v1.Pod{
+					ObjectMeta: metav1.ObjectMeta{
+						Annotations: map[string]string{
+							"ira.ontsys.com/trust-anchor":                     "ta",
+							"ira.ontsys.com/profile":                          "p",
+							"ira.ontsys.com/role":                             "c",
+							"ira.ontsys.com/metadata-endpoint-trailing-slash": "true",
+						},
+						Name:      "annotated-trailing",
+						Namespace: "default",
+					},
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{
+								Name:  "my-container",
+								Image: "my-image",
+							},
+						},
+					},
+				}
+				Expect(k8sClient.Create(ctx, pod)).To(Succeed())
+
+				Eventually(func() *gbytes.Buffer {
+					return buffer
+				}, 5*time.Second, 25*time.Millisecond).Should(gbytes.Say("Attempting to patch pod"))
+
+				mutatedPod := &v1.Pod{}
+				Eventually(func() bool {
+					err := k8sClient.Get(ctx, types.NamespacedName{
+						Namespace: "default",
+						Name:      "annotated-trailing",
+					}, mutatedPod)
+					return err == nil
+				}, 10*time.Second, 25*time.Millisecond).Should(BeTrue())
+				Expect(mutatedPod.Spec.Volumes).To(ContainElement(HaveField("Name", Equal("ira-cert"))))
+				Expect(mutatedPod.Spec.Volumes).To(ContainElement(HaveField("VolumeSource.Secret.SecretName", "annotated-trailing-ira")))
+				Expect(mutatedPod.Spec.Containers).To(HaveExactElements(HaveField("Env", ContainElement(v1.EnvVar{
+					Name:  "AWS_EC2_METADATA_SERVICE_ENDPOINT",
+					Value: "http://127.0.0.1:9911/",
+				}))))
+				Expect(mutatedPod.Spec.InitContainers).To(ContainElement(HaveField("Name", Equal("ira"))))
+				Expect(mutatedPod.Spec.InitContainers).To(ContainElement(HaveField("VolumeMounts", ContainElement(v1.VolumeMount{
+					Name:      "ira-cert",
+					MountPath: "/ira-cert",
+				}))))
+				Expect(mutatedPod.Spec.InitContainers).To(ContainElement(HaveField("Args", ContainElements("ta", "p", "c"))))
+				Expect(mutatedPod.Spec.InitContainers).To(ContainElement(HaveField("Resources", v1.ResourceRequirements{
+					Limits: v1.ResourceList{
+						v1.ResourceMemory: resource.MustParse("128Mi"),
+					},
+					Requests: v1.ResourceList{
+						v1.ResourceCPU:    resource.MustParse("250m"),
+						v1.ResourceMemory: resource.MustParse("64Mi"),
+					},
+				})))
+				Expect(mutatedPod.Spec.InitContainers).To(Not(ContainElement(HaveField("Resources", v1.ResourceRequirements{
+					Limits: v1.ResourceList{
+						v1.ResourceCPU: resource.MustParse("500m"),
+					},
+				}))))
+			})
+		})
 	})
 })

@@ -21,6 +21,8 @@ controllerManager:
     annotations: {}
   tolerations: []
 kubernetesClusterDomain: cluster.local
+webhook:
+  excludedNamespaces: []
 webhookService:
   ports:
   - port: 443

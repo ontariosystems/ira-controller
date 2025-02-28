@@ -3,6 +3,16 @@ entries:
   ira-controller:
   - apiVersion: v2
     appVersion: 1.2.0
+    created: "2025-02-28T19:40:54.321549961Z"
+    description: A Helm chart for the ira-controller
+    digest: 3d670178f19e4b2a278ebfc7dcd98d7a53f898dee15597323867f8440f858c8a
+    name: ira-controller
+    type: application
+    urls:
+    - https://github.com/ontariosystems/ira-controller/releases/download/helm-chart-ira-controller-2.0.0/ira-controller-2.0.0.tgz
+    version: 2.0.0
+  - apiVersion: v2
+    appVersion: 1.2.0
     created: "2025-01-29T16:37:06.11451329Z"
     description: A Helm chart for the ira-controller
     digest: 964d64fcb871bb0e7d64b50920e6b8801c881872fa9450536d34fe49e0ca38d4
@@ -91,4 +101,4 @@ entries:
     urls:
     - https://github.com/ontariosystems/ira-controller/releases/download/helm-chart-ira-controller-1.0.0/ira-controller-1.0.0.tgz
     version: 1.0.0
-generated: "2025-01-29T16:37:06.114564275Z"
+generated: "2025-02-28T19:40:54.321595135Z"

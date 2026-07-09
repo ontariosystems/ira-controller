@@ -463,7 +463,7 @@ var _ = Describe("Pod Controller", func() {
 							},
 							Spec: cmv1.CertificateSpec{
 								CommonName: fmt.Sprintf("IRA exists: %s/%s ", "default", "existing-cert"),
-								IssuerRef: cmmeta.ObjectReference{
+								IssuerRef: cmmeta.IssuerReference{
 									Name:  "cluster-ira-ca",
 									Kind:  cmv1.ClusterIssuerKind,
 									Group: "cert-manager.io",

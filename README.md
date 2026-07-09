@@ -39,11 +39,11 @@ The TLS secret that is generated from this certificate will then be the one used
 ## Getting Started
 
 ### Prerequisites
-- go version v1.23.0+
+- go version v1.25.0+
 - docker version 26.1+.
-- kubectl version v1.29.0+.
+- kubectl version v1.34.0+.
 - helm version v3.15.2+.
-- Access to a Kubernetes v1.29.0+ cluster.
+- Access to a Kubernetes v1.34.0+ cluster.
 
 This project may work on older versions but has not been tested.
 

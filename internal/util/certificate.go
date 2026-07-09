@@ -61,7 +61,7 @@ func GenerateCertificate(ctx context.Context, annotations map[string]string, nam
 			},
 			Spec: cmv1.CertificateSpec{
 				CommonName: getCommonName(name, namespace),
-				IssuerRef: cmmeta.ObjectReference{
+				IssuerRef: cmmeta.IssuerReference{
 					Name:  issuerName,
 					Kind:  issuerKind,
 					Group: "cert-manager.io",
@@ -91,7 +91,7 @@ func GenerateCertificate(ctx context.Context, annotations map[string]string, nam
 		}
 
 		if ownerReference != nil {
-			certificate.ObjectMeta.OwnerReferences = []metav1.OwnerReference{*ownerReference}
+			certificate.OwnerReferences = []metav1.OwnerReference{*ownerReference}
 		}
 
 		foundCertificate, err := cmClient.Get(ctx, certName, metav1.GetOptions{})
@@ -104,7 +104,7 @@ func GenerateCertificate(ctx context.Context, annotations map[string]string, nam
 			return reconcile.Result{}, err
 		} else {
 			log.Info("Found certificate", "calculated cert name", certName, "found cert", foundCertificate)
-			certificate.ObjectMeta.SetResourceVersion(foundCertificate.ObjectMeta.GetResourceVersion())
+			certificate.SetResourceVersion(foundCertificate.GetResourceVersion())
 
 			if _, err := cmClient.Update(ctx, certificate, metav1.UpdateOptions{}); err != nil {
 				return reconcile.Result{}, err

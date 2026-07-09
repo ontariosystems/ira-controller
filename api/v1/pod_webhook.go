@@ -170,7 +170,7 @@ func (p *podIraInjector) Handle(ctx context.Context, request admission.Request) 
 
 	podlog.Info("Attempting to patch pod", "pod", pod.Name, "pod namespace", pod.Namespace, "pod generate name", pod.GenerateName)
 
-	return admission.PatchResponseFromRaw(request.AdmissionRequest.Object.Raw, marshaledpod)
+	return admission.PatchResponseFromRaw(request.Object.Raw, marshaledpod)
 }
 
 // InjectDecoder injects the decoder.

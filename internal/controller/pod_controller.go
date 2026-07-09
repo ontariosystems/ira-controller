@@ -110,7 +110,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	certDuration := DefaultCertificateDuration
 	certRenewBefore := DefaultCertificateRenewBefore
 
-	return util.GenerateCertificate(ctx, pod.ObjectMeta.Annotations, name, pod.Namespace, owner, issuerKind, issuerName, certDuration, certRenewBefore)
+	return util.GenerateCertificate(ctx, pod.Annotations, name, pod.Namespace, owner, issuerKind, issuerName, certDuration, certRenewBefore)
 }
 
 // SetupWithManager sets up the controller with the Manager.
